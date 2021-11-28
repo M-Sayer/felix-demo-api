@@ -1,28 +1,36 @@
 import nodemailer from 'nodemailer';
+import { NODE_ENV, SMTP_HOST, SMTP_FROM, SMTP_PW } from '../src/config.js';
 
 // async..await is not allowed in global scope, must use a wrapper
-export async function sendEmail(token) {
+export async function sendEmail(email, token) {
   // Generate test SMTP service account from ethereal.email
   // Only needed if you don't have a real mail account for testing
   let testAccount = await nodemailer.createTestAccount();
 
+  const dev = NODE_ENV === 'development'
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
-    host: "smtp.ethereal.email",
-    port: 587,
-    secure: false, // true for 465, false for other ports
+    host: dev ? 'smtp.ethereal.email' : SMTP_HOST,
+    port: dev ? 587 : 465,
+    secure: dev ? false : true, // true for 465, false for other ports
     auth: {
-      user: testAccount.user, // generated ethereal user
-      pass: testAccount.pass, // generated ethereal password
+      user: dev ? testAccount.user : SMTP_FROM, // generated ethereal user
+      pass: dev ? testAccount.pass : SMTP_PW, // generated ethereal password
     },
   });
 
+  transporter.verify((error, success) => {
+    if (error) return console.error(error)
+
+    console.log('Ready to send mail')
+  })
+
   // send mail with defined transport object
   let info = await transporter.sendMail({
-    from: '"Fred Foo 👻" <foo@example.com>', // sender address
-    to: "haji.san@icloud.com", // list of receivers
-    subject: "Hello ✔", // Subject line
-    text: "Hello world?", // plain text body
+    from: dev ? '"Fred Foo 👻" <foo@example.com>' : SMTP_FROM, // sender address
+    to: email, // list of receivers
+    subject: 'Felix Demo Login', // Subject line
+    text: "Your link to login", // plain text body
     html: `<a href='http://localhost:3000/email/${token}'>login</a>`, // html body
   });
 
