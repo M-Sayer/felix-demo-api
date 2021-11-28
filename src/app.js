@@ -22,10 +22,10 @@ app.use(helmet());
 app.use(cors());
 app.use(json());
 
-app.use('/api/users', usersRouter);
-app.use('/api/goals', goalsRouter);
-app.use('/api/transactions', transactionsRouter);
-app.use('/api/alerts', alertsRouter);
+app.use('/users', usersRouter);
+app.use('/goals', goalsRouter);
+app.use('/transactions', transactionsRouter);
+app.use('/alerts', alertsRouter);
 
 app.use(errorHandler);
 
