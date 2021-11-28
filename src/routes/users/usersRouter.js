@@ -11,8 +11,7 @@ const {
   createAuthToken, 
   createEmailToken, 
   verifyEmailToken, 
-  getUserWithId, 
-  createJwt 
+  getUserWithId,
 } = UsersService;
 
 export const usersRouter = Router();
@@ -55,14 +54,9 @@ usersRouter.post('/register', async (req, res, next) => {
     // Insert new user object into database
     const user = await createUser(db, newUser);
 
-    // Get user id and username from db to create jwt token
-    const sub = user.username;
-    const payload = { user_id: user.id };
+    await sendEmail(email, createEmailToken({ userId: user.id }));
 
-    // Create and send jwt
-    res.status(200).json({
-      authToken: createJwt(sub, payload),
-    });
+    res.status(200).end()
   } catch (error) {
     next(error);
   }

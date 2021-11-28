@@ -1,5 +1,12 @@
 import nodemailer from 'nodemailer';
-import { NODE_ENV, SMTP_HOST, SMTP_FROM, SMTP_PW } from '../src/config.js';
+
+import dotenv from 'dotenv'
+
+dotenv.config()
+
+const FRONT_END_URL = process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : process.env.FRONT_END_URL
+const SMTP_FROM = process.env.SMTP_FROM
+const SENDGRID_KEY = process.env.SENDGRID_KEY
 
 // async..await is not allowed in global scope, must use a wrapper
 export async function sendEmail(email, token) {
@@ -7,15 +14,15 @@ export async function sendEmail(email, token) {
   // Only needed if you don't have a real mail account for testing
   let testAccount = await nodemailer.createTestAccount();
 
-  const dev = NODE_ENV === 'development'
   // create reusable transporter object using the default SMTP transport
   let transporter = nodemailer.createTransport({
-    host: dev ? 'smtp.ethereal.email' : SMTP_HOST,
-    port: dev ? 587 : 465,
-    secure: dev ? false : true, // true for 465, false for other ports
+    service: 'SendGrid',
+    // host: SMTP_HOST,
+    // port: 587,
+    // secure: false, // true for 465, false for other ports
     auth: {
-      user: dev ? testAccount.user : SMTP_FROM, // generated ethereal user
-      pass: dev ? testAccount.pass : SMTP_PW, // generated ethereal password
+      user: 'apikey',
+      pass: SENDGRID_KEY,
     },
   });
 
@@ -27,11 +34,11 @@ export async function sendEmail(email, token) {
 
   // send mail with defined transport object
   let info = await transporter.sendMail({
-    from: dev ? '"Fred Foo 👻" <foo@example.com>' : SMTP_FROM, // sender address
+    from: SMTP_FROM, // sender address
     to: email, // list of receivers
     subject: 'Felix Demo Login', // Subject line
     text: "Your link to login", // plain text body
-    html: `<a href='http://localhost:3000/email/${token}'>login</a>`, // html body
+    html: `<a href='${FRONT_END_URL}/email/${token}'>login</a>`, // html body
   });
 
   console.log("Message sent: %s", info.messageId);

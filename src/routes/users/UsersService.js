@@ -8,12 +8,6 @@ const REGEX_UPPER_LOWER_NUMBER_SPECIAL = /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*
 const REGEX_UPPER_LOWER_NUMBER_DASH_HYPHEN = /(?=.*[!@#\$%\^&])[\S]+/;
 
 export const UsersService = {
-  createJWT(subject, payload) {
-    return sign(payload, JWT_SECRET, {
-      subject,
-      algorithm: 'HS256',
-    });
-  },
   createAuthToken(payload) {
     return sign(payload, JWT_SECRET, {
       algorithm: 'HS256'
