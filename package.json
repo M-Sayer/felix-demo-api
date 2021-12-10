@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "mocha --require test/setup.js",
-    "dev": "nodemon src/server.js --delay 2000ms",
+    "dev": "NODE_ENV=development nodemon src/server.js --delay 2000ms",
     "migrate": "postgrator --config postgrator-config.cjs",
     "migrate:test": "env NODE_ENV=test npm run migrate",
     "migrate:production": "heroku run npm run migrate",

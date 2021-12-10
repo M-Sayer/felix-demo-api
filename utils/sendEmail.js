@@ -12,19 +12,32 @@ const SENDGRID_KEY = process.env.SENDGRID_KEY
 export async function sendEmail(email, token) {
   // Generate test SMTP service account from ethereal.email
   // Only needed if you don't have a real mail account for testing
-  let testAccount = await nodemailer.createTestAccount();
 
-  // create reusable transporter object using the default SMTP transport
-  let transporter = nodemailer.createTransport({
-    service: 'SendGrid',
-    // host: SMTP_HOST,
-    // port: 587,
-    // secure: false, // true for 465, false for other ports
-    auth: {
-      user: 'apikey',
-      pass: SENDGRID_KEY,
-    },
-  });
+  let transporter
+
+  if (process.env.NODE_ENV === 'development') {
+    let testAccount = await nodemailer.createTestAccount();
+
+    // create reusable transporter object using the default SMTP transport
+    transporter = nodemailer.createTransport({
+      host: "smtp.ethereal.email",
+      port: 587,
+      secure: false, // true for 465, false for other ports
+      auth: {
+        user: testAccount.user, // generated ethereal user
+        pass: testAccount.pass, // generated ethereal password
+      },
+    });
+  } else {
+    transporter = nodemailer.createTransport({
+      service: 'SendGrid',
+      auth: {
+        user: 'apikey',
+        pass: SENDGRID_KEY,
+      },
+    });
+  }
+
 
   transporter.verify((error, success) => {
     if (error) return console.error(error)
