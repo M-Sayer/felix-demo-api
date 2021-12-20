@@ -89,9 +89,27 @@ usersRouter.post('/login', async (req, res, next) => {
   }
 });
 
-usersRouter.post(
-  '/login/token',
-  async (req, res, next) => {
+usersRouter.get('/login/demo', async (req, res, next) => {
+  const db = req.app.get('db')
+  
+  try {
+    const demoUser = {
+      first_name: 'Demo',
+      last_name: 'User',
+      email: 'demo@demo.com'
+    }
+
+    const user = await createUser(db, demoUser)
+
+    return res.json({
+      authToken: createEmailToken({ userId: user.id })
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+usersRouter.post('/login/token', async (req, res, next) => {
     try {
       const { token } = req.body;
       const decoded = await verifyEmailToken(token);
@@ -106,7 +124,7 @@ usersRouter.post(
         authToken: createAuthToken({ userId: decoded.userId })
       })
       
-    } catch(e) {
+    } catch(error) {
       next(error)
     }
   }
